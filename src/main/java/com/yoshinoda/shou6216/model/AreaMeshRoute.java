@@ -47,6 +47,10 @@ public class AreaMeshRoute {
 		return timeTrain;
 	}
 	
+	public void setTimeCar(int timeCar) {
+		this.timeCar = timeCar;
+	}
+	
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this ,ToStringStyle.SHORT_PREFIX_STYLE);

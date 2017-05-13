@@ -76,27 +76,23 @@ public class RegisterRun {
 			LOGGER.info("fromMeshCode : {}", fromMeshCode);
 			
 			//ログを出すと遅い
-			Set<AreaMeshRoute> toMeshSet = getToMeshList(fromMeshCode);
-			for (AreaMeshRoute toMesh : toMeshSet) {
-				float correctionCar = getCorrection(
-						fromMeshCode, toMesh.getToMeshCode());
-			}
-			
-			
-			List<String> writeLines = toMeshSet
+			List<String> writeLines = getToMeshList(fromMeshCode)
 					.stream()
-					.map(to -> String.format(JSON_FORMAT,
-							to.getFromMeshCode(),
-							to.getToMeshCode(),
-							to.getTimeWalk(),
-							to.getTimeCar(),
-							to.getTimeTrain()
-							))
+					.map(to -> {
+						float correctionCar = getCorrection(
+								fromMeshCode, to.getToMeshCode());
+						to.setTimeCar(Math.round(to.getTimeCar() * correctionCar));
+						return String.format(JSON_FORMAT,
+								to.getFromMeshCode(),
+								to.getToMeshCode(),
+								to.getTimeWalk(),
+								to.getTimeCar(),
+								to.getTimeTrain());
+					})
 					.collect(Collectors.toList());
-					
 			
 			String outputFileName = String.format(OUTPUT_FILE_FORMAT, 
-					fromMeshCode, toMeshSet.size(), date);
+					fromMeshCode, writeLines.size(), date);
 			
 			writeLines(outputFileName, writeLines);
 		}
