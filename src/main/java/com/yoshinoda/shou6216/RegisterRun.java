@@ -8,7 +8,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,7 +39,11 @@ public class RegisterRun {
 	private static final String FROM_FILE = "fromList.txt";
 	private static final String TO_FILE = "toList.txt";
 	private static final int TO_COLUMN = 4;
-
+	private static final String JSON_FORMAT = 
+			"{'fromMeshCode':%d,'toMeshCode':%d,'timeWalk':%d,'timeCar':%d,'timeTrain':%d}";
+	private static final String OUTPUT_DIR = "result";
+	private static final String OUTPUT_FILE_FORMAT = "idsAreaMeshRoute_%d_to%d_%tF.json";
+	
 	public static void main(String[] args) {
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -51,20 +58,46 @@ public class RegisterRun {
 	}
 	
 	public void execute() {
+		if (!Files.isDirectory(Paths.get(OUTPUT_DIR))) {
+			LOGGER.warn("output dire not found : {}", OUTPUT_DIR);
+			return;
+		}
+		
 		List<Integer> fromMeshCodeList = getFromMeshCodeList();
 		if (fromMeshCodeList.isEmpty()) {
 			LOGGER.info("fromMeshCodeList is empty");
 			return;
 		}
-
+		
+		Date date = Calendar.getInstance().getTime();
+		LOGGER.info("date : {}", date);
 		LOGGER.info("Number of fromMeshCodeList : {}", fromMeshCodeList.size());
 		for (int fromMeshCode : fromMeshCodeList) {
 			LOGGER.info("fromMeshCode : {}", fromMeshCode);
 			
+			//ログを出すと遅い
 			Set<AreaMeshRoute> toMeshSet = getToMeshList(fromMeshCode);
 			for (AreaMeshRoute toMesh : toMeshSet) {
-				LOGGER.info("toMeshCode : {}", toMesh);
+				//LOGGER.info("toMeshCode : {}", toMesh);
 			}
+			
+			
+			List<String> writeLines = toMeshSet
+					.stream()
+					.map(to -> String.format(JSON_FORMAT,
+							to.getFromMeshCode(),
+							to.getToMeshCode(),
+							to.getTimeWalk(),
+							to.getTimeCar(),
+							to.getTimeTrain()
+							))
+					.collect(Collectors.toList());
+					
+			
+			String outputFileName = String.format(OUTPUT_FILE_FORMAT, 
+					fromMeshCode, toMeshSet.size(), date);
+			
+			writeLines(outputFileName, writeLines);
 		}
 	}
 
@@ -107,5 +140,15 @@ public class RegisterRun {
 			LOGGER.error("read toMeshList error", e);
 		}
 		return toMeshSet;
+	}
+	
+	private void writeLines(String fileName, List<String> writeLines) {
+		try {
+			Files.write(Paths.get(OUTPUT_DIR, fileName), writeLines,
+					Charset.forName("UTF-8"), StandardOpenOption.CREATE);
+			
+		} catch (IOException e) {
+			LOGGER.error("write JSON error", e);
+		}
 	}
 }
