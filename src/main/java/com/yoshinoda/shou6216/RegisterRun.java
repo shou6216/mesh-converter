@@ -103,8 +103,7 @@ public class RegisterRun {
 	}
 
 	private float getCorrection(int fromMeshCode, int toMeshCode) {
-		// TODO 自動生成されたメソッド・スタブ
-		return 0;
+		return Double.valueOf(Math.random()).floatValue();
 	}
 
 	private List<Integer> getFromMeshCodeList() {
