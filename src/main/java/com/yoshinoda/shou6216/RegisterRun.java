@@ -78,7 +78,8 @@ public class RegisterRun {
 			//ログを出すと遅い
 			Set<AreaMeshRoute> toMeshSet = getToMeshList(fromMeshCode);
 			for (AreaMeshRoute toMesh : toMeshSet) {
-				//LOGGER.info("toMeshCode : {}", toMesh);
+				float correctionCar = getCorrection(
+						fromMeshCode, toMesh.getToMeshCode());
 			}
 			
 			
@@ -101,6 +102,11 @@ public class RegisterRun {
 		}
 	}
 
+	private float getCorrection(int fromMeshCode, int toMeshCode) {
+		// TODO 自動生成されたメソッド・スタブ
+		return 0;
+	}
+
 	private List<Integer> getFromMeshCodeList() {
 		Path path = Paths.get(FROM_FILE);
 		LOGGER.info("fromMeshCodeList path={}", path);
@@ -119,11 +125,8 @@ public class RegisterRun {
 	}
 	
 	private Set<AreaMeshRoute> getToMeshList(int fromMeshCode) {
-		Path path = Paths.get(TO_FILE);
-		LOGGER.info("toMeshList path={}", path);
-		
 		Set<AreaMeshRoute> toMeshSet = new HashSet<AreaMeshRoute>();
-		try (Stream<String> stream = Files.lines(path, Charset.forName("UTF-8"))) {
+		try (Stream<String> stream = Files.lines(Paths.get(TO_FILE), Charset.forName("UTF-8"))) {
 			toMeshSet = stream
 				.map(line -> line.split(","))
 				.filter(values -> values.length == TO_COLUMN)
