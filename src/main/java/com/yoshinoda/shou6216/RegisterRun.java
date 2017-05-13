@@ -76,8 +76,11 @@ public class RegisterRun {
 			LOGGER.info("fromMeshCode : {}", fromMeshCode);
 			
 			//ログを出すと遅い
+			//パラレルストリーム
+			//correctionはfromごと取得
+			// fromの標準3次→ 大小のメッシュコード→大小それぞれの補正係数取得
 			List<String> writeLines = getToMeshList(fromMeshCode)
-					.stream()
+					.parallelStream()
 					.map(to -> {
 						float correctionCar = getCorrection(
 								fromMeshCode, to.getToMeshCode());
